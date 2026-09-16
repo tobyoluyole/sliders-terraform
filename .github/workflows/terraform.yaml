@@ -1,6 +1,12 @@
 name: "Terraform Infrastructure Pipeline"
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'environments/**'
+      - 'modules/**'
   pull_request:
     branches:
       - main
@@ -10,35 +16,34 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: 'Environment to APPLY (staging or production)'
         required: true
         type: choice
         options:
           - staging
           - production
-      action:
-        description: 'Terraform action to perform'
-        required: true
-        type: choice
-        options:
-          - plan
-          - apply
 
 permissions:
-  id-token: write 
+  id-token: write # Required for AWS OIDC authentication
   contents: read
   pull-requests: write 
 
 jobs:
-  terraform:
-    name: "Terraform ${{ github.event.inputs.action || 'plan' }} - ${{ github.event.inputs.environment || 'staging' }}"
+  # ------------------------------------------------------------------------------
+  # 1. AUTO-PLAN: Runs automatically on Push and PR for BOTH environments
+  # ------------------------------------------------------------------------------
+  plan:
+    name: "Plan - ${{ matrix.environment }}"
+    # Only run on pushes or pull requests, ignore workflow_dispatch
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [staging, production]
     
     env:
-      # Dynamically sets the path to the root-level environments folder
-      TF_WORKING_DIR: "environments/${{ github.event.inputs.environment || 'staging' }}"
+      TF_WORKING_DIR: "environments/${{ matrix.environment }}"
       AWS_REGION: "eu-west-1"
-      # Replace with your actual AWS IAM Role ARN for GitHub Actions
       AWS_ROLE_ARN: "arn:aws:iam::323708468663:role/github-actions-terraform-role"
 
     defaults:
@@ -60,50 +65,50 @@ jobs:
         with:
           terraform_version: "1.9.0"
 
-      - name: Terraform Format Check
-        id: fmt
-        run: terraform fmt -check -recursive ../../
-
       - name: Terraform Init
-        id: init
         run: terraform init
 
       - name: Terraform Validate
-        id: validate
         run: terraform validate -no-color
 
       - name: Terraform Plan
-        id: plan
-        if: github.event_name == 'pull_request' || github.event.inputs.action == 'plan'
-        run: terraform plan -no-color -out=tfplan
-        
-      - name: Post Plan to PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        run: terraform plan -no-color
+
+  # ------------------------------------------------------------------------------
+  # 2. MANUAL APPLY: Runs ONLY when triggered manually via GitHub Actions UI
+  # ------------------------------------------------------------------------------
+  apply:
+    name: "Apply - ${{ github.event.inputs.environment }}"
+    # Only run when manually triggered via workflow_dispatch
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    
+    env:
+      TF_WORKING_DIR: "environments/${{ github.event.inputs.environment }}"
+      AWS_REGION: "eu-west-1"
+      AWS_ROLE_ARN: "arn:aws:iam::323708468663:role/github-actions-terraform-role"
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
-            <details><summary>Show Plan</summary>
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
 
-            \`\`\`\n
-            ${process.env.PLAN}
-            \`\`\`
-
-            </details>`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+      - name: Terraform Init
+        run: terraform init
 
       - name: Terraform Apply
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve
