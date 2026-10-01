@@ -5,7 +5,7 @@ azs             = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
 private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 
-# Staging is scaled down to save costs
+cluster_version = "1.30"
 instance_types  = ["t3.medium"]
 min_size        = 2
 max_size        = 4
