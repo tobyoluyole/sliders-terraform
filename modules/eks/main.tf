@@ -17,6 +17,21 @@ module "eks" {
   # Grant cluster admin permissions to the IAM user/role running Terraform
   enable_cluster_creator_admin_permissions = true
 
+  # Grant cluster admin permissions to your personal IAM user
+  access_entries = {
+    tobi_admin = {
+      principal_arn = "arn:aws:iam::323708468663:user/tobi-admin"
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   # Default add-ons
   cluster_addons = {
     coredns = {
