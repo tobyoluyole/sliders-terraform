@@ -66,13 +66,13 @@ jobs:
           terraform_version: "1.9.0"
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -input=false
 
       - name: Terraform Validate
         run: terraform validate -no-color
 
       - name: Terraform Plan
-        run: terraform plan -no-color
+        run: terraform plan -input=false -no-color
 
   # ------------------------------------------------------------------------------
   # 2. MANUAL APPLY: Runs ONLY when triggered manually via GitHub Actions UI
@@ -108,7 +108,7 @@ jobs:
           terraform_version: "1.9.0"
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -input=false
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -input=false -auto-approve
