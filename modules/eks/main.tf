@@ -35,6 +35,9 @@ module "eks" {
     main = {
       name = "${var.environment}-node-group"
 
+      # Explicitly set AMI type to support EKS 1.30+
+      ami_type       = "AL2023_x86_64_STANDARD"
+
       instance_types = var.instance_types
       capacity_type  = "ON_DEMAND"
 
