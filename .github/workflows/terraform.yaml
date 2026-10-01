@@ -111,5 +111,10 @@ jobs:
       - name: Terraform Init
         run: terraform init -input=false
 
+      - name: Clean up broken Helm release
+        run: |
+          aws eks update-kubeconfig --region eu-west-1 --name sliders-staging-cluster
+          helm uninstall external-secrets -n external-secrets --ignore-not-found
+
       - name: Terraform Apply
         run: terraform apply -input=false -auto-approve
