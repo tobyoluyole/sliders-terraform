@@ -5,25 +5,24 @@ resource "helm_release" "aws_load_balancer_controller" {
   namespace  = "kube-system"
   version    = "1.7.2" 
 
-  set {
-    name  = "clusterName"
-    value = var.cluster_name
-  }
-  
-  set {
-    name  = "serviceAccount.create"
-    value = "true"
-  }
-  
-  set {
-    name  = "serviceAccount.name"
-    value = "aws-load-balancer-controller"
-  }
-  
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = var.aws_load_balancer_controller_role_arn
-  }
+  set = [
+    {
+      name  = "clusterName"
+      value = var.cluster_name
+    },
+    {
+      name  = "serviceAccount.create"
+      value = "true"
+    },
+    {
+      name  = "serviceAccount.name"
+      value = "aws-load-balancer-controller"
+    },
+    {
+      name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+      value = var.aws_load_balancer_controller_role_arn
+    }
+  ]
 }
 
 # Sleep timer to allow the ALBC webhook pods to fully start before proceeding
@@ -43,23 +42,22 @@ resource "helm_release" "external_secrets" {
   # Force this chart to wait for the sleep timer
   depends_on = [time_sleep.wait_for_albc_webhook]
 
-  set {
-    name  = "installCRDs"
-    value = "true"
-  }
-  
-  set {
-    name  = "serviceAccount.create"
-    value = "true"
-  }
-  
-  set {
-    name  = "serviceAccount.name"
-    value = "external-secrets"
-  }
-  
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = var.external_secrets_role_arn
-  }
+  set = [
+    {
+      name  = "installCRDs"
+      value = "true"
+    },
+    {
+      name  = "serviceAccount.create"
+      value = "true"
+    },
+    {
+      name  = "serviceAccount.name"
+      value = "external-secrets"
+    },
+    {
+      name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+      value = var.external_secrets_role_arn
+    }
+  ]
 }
