@@ -7,6 +7,6 @@ public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 
 cluster_version = "1.37"
 instance_types  = ["t3.medium"]
-min_size        = 4
-max_size        = 4
+min_size        = 3
+max_size        = 5
 desired_size    = 4
