@@ -7,3 +7,8 @@ output "external_secrets_role_arn" {
   description = "IAM Role ARN for the External Secrets Operator"
   value       = module.external_secrets_irsa_role.iam_role_arn
 }
+
+output "ebs_csi_role_arn" {
+  description = "IAM role ARN for the Amazon EBS CSI controller"
+  value       = module.ebs_csi_irsa_role.iam_role_arn
+}

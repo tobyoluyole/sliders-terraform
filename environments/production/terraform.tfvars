@@ -10,3 +10,5 @@ instance_types  = ["m5.large"]
 min_size        = 3
 max_size        = 10
 desired_size    = 3
+
+ebs_csi_addon_version = "v1.66.0-eksbuild.1"

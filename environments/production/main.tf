@@ -9,7 +9,7 @@ provider "helm" {
   kubernetes = {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    
+
     exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
@@ -72,6 +72,21 @@ module "argocd" {
   source = "../../modules/argocd"
 
   environment = var.environment
-  
-  depends_on  = [module.helm_bootstraps]
+
+  depends_on = [module.helm_bootstraps]
+}
+
+module "eks_addons" {
+  source = "../../modules/eks_addons"
+
+  environment           = var.environment
+  cluster_name          = module.eks.cluster_name
+  ebs_csi_role_arn      = module.iam_irsa.ebs_csi_role_arn
+  ebs_csi_addon_version = var.ebs_csi_addon_version
+
+  # Wait for the cluster, node groups, IAM role, and policy attachments.
+  depends_on = [
+    module.eks,
+    module.iam_irsa,
+  ]
 }

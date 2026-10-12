@@ -10,3 +10,5 @@ instance_types  = ["t3.medium"]
 min_size        = 3
 max_size        = 5
 desired_size    = 4
+
+ebs_csi_addon_version = "v1.66.0-eksbuild.1"
