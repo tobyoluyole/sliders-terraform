@@ -25,11 +25,6 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 }
 
-# Sleep timer to allow the ALBC webhook pods to fully start before proceeding
-resource "time_sleep" "wait_for_albc_webhook" {
-  depends_on      = [helm_release.aws_load_balancer_controller]
-  create_duration = "45s"
-}
 
 resource "helm_release" "external_secrets" {
   name             = "external-secrets"
@@ -37,10 +32,7 @@ resource "helm_release" "external_secrets" {
   chart            = "external-secrets"
   namespace        = "external-secrets"
   create_namespace = true
-  version          = "0.10.3" 
-
-  # Force this chart to wait for the sleep timer
-  depends_on = [time_sleep.wait_for_albc_webhook]
+  version          = "0.9.15-2" 
 
   set = [
     {
