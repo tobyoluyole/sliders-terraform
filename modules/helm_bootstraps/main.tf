@@ -9,14 +9,17 @@ resource "helm_release" "aws_load_balancer_controller" {
     name  = "clusterName"
     value = var.cluster_name
   }
+  
   set {
     name  = "serviceAccount.create"
     value = "true"
   }
+  
   set {
     name  = "serviceAccount.name"
     value = "aws-load-balancer-controller"
   }
+  
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
     value = var.aws_load_balancer_controller_role_arn
@@ -44,14 +47,17 @@ resource "helm_release" "external_secrets" {
     name  = "installCRDs"
     value = "true"
   }
+  
   set {
     name  = "serviceAccount.create"
     value = "true"
   }
+  
   set {
     name  = "serviceAccount.name"
     value = "external-secrets"
   }
+  
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
     value = var.external_secrets_role_arn
