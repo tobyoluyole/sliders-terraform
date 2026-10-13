@@ -5,19 +5,15 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
 
-  # Cluster endpoint access
   cluster_endpoint_public_access = true
 
   vpc_id     = var.vpc_id
   subnet_ids = var.subnet_ids
 
-  # Enable OIDC Provider for IAM Roles for Service Accounts (IRSA)
   enable_irsa = true
 
-  # Grant cluster admin permissions to the IAM user/role running Terraform
   enable_cluster_creator_admin_permissions = true
 
-  # Grant cluster admin permissions to your personal IAM user
   access_entries = {
     tobi_admin = {
       principal_arn = "arn:aws:iam::323708468663:user/tobi-admin"
@@ -32,7 +28,6 @@ module "eks" {
     }
   }
 
-  # Default add-ons
   cluster_addons = {
     coredns = {
       most_recent = true
@@ -45,13 +40,11 @@ module "eks" {
     }
   }
 
-  # EKS Managed Node Groups
   eks_managed_node_groups = {
     main = {
       name = "${var.environment}-node-group"
 
-      # Explicitly set AMI type to support EKS 1.30+
-      ami_type       = "AL2023_x86_64_STANDARD"
+      ami_type = "AL2023_x86_64_STANDARD"
 
       instance_types = var.instance_types
       capacity_type  = "ON_DEMAND"
@@ -60,7 +53,6 @@ module "eks" {
       max_size     = var.max_size
       desired_size = var.desired_size
 
-      # Update strategy - max unavailable during upgrades
       update_config = {
         max_unavailable_percentage = 33
       }

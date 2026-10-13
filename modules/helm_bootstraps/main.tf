@@ -3,7 +3,7 @@ resource "helm_release" "aws_load_balancer_controller" {
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
   namespace  = "kube-system"
-  version    = "1.7.2" 
+  version    = "1.7.2"
 
   set = [
     {
@@ -37,9 +37,8 @@ resource "helm_release" "external_secrets" {
   chart            = "external-secrets"
   namespace        = "external-secrets"
   create_namespace = true
-  version          = "0.9.15-2" 
+  version          = "0.9.15-2"
 
-  # Force this chart to wait for the sleep timer
   depends_on = [time_sleep.wait_for_albc_webhook]
 
   set = [

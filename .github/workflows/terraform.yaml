@@ -30,12 +30,8 @@ permissions:
   pull-requests: write 
 
 jobs:
-  # ------------------------------------------------------------------------------
-  # 1. AUTO-PLAN: Runs automatically on Push and PR for BOTH environments
-  # ------------------------------------------------------------------------------
   plan:
     name: "Plan - ${{ matrix.environment }}"
-    # Only run on pushes or pull requests, ignore workflow_dispatch
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
@@ -75,12 +71,8 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -input=false -no-color
 
-  # ------------------------------------------------------------------------------
-  # 2. MANUAL APPLY: Runs ONLY when triggered manually via GitHub Actions UI
-  # ------------------------------------------------------------------------------
   apply:
     name: "Apply - ${{ github.event.inputs.environment }}"
-    # Only run when manually triggered via workflow_dispatch
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     
